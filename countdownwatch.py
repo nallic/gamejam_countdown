@@ -16,28 +16,6 @@ size = width, height = 640, 480
 black = (0, 0, 0)
 white = (255,255,255)
 
-''' helpers '''
-
-def surface_to_string(surface):
-    """Convert a pygame surface into string"""
-    return pygame.image.tostring(surface, 'RGB')
-
-
-def pygame_to_cvimage(surface):
-    """Convert a pygame surface into a cv image"""
-    cv_image = cv2.CreateImageHeader(surface.get_size(), cv2.IPL_DEPTH_8U, 3)
-    image_string = surface_to_string(surface)
-    cv2.SetData(cv_image, image_string)
-    return cv_image
-
-
-def cvimage_to_pygame(image):
-    """Convert cvimage into a pygame image"""
-    image_rgb = cv2.CreateMat(image.height, image.width, cv2.CV_8UC3)
-    cv2.CvtColor(image, image_rgb, cv2.CV_BGR2RGB)
-    return pygame.image.frombuffer(image.tostring(), cv2.GetSize(image_rgb),
-                                   "RGB")
-
 ''' program '''
 pygame.init()
 
