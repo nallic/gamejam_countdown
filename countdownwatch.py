@@ -7,7 +7,7 @@ import sys, pygame
 ''' configuration '''
 
 deadline = datetime(day=18, month=10, year=2017, hour=22, minute=00)
-print ('deadline is : ' + str(deadline) + ' which is ' + str((deadline - datetime.now()).seconds/3600) + ' hours from now')
+print ('deadline is : ' + str(deadline))
 
 size = width, height = 640, 480
 
@@ -19,10 +19,14 @@ white = (255,255,255)
 ''' program '''
 pygame.init()
 
+clock = pygame.time.Clock()
+
 screen = pygame.display.set_mode(size)
 font = pygame.font.Font('digital-7.mono.ttf', 150)
 
 while 1:
+    clock.tick(30) # 30 fps
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
 
@@ -37,7 +41,7 @@ while 1:
 
     current_timer_string = '%02d:%02d:%02d' % (current_timer_hours, current_timer_minutes, current_timer_s)
 
-    current_timer = font.render(current_timer_string, False, white, black)
+    current_timer = font.render(current_timer_string, True, white, black)
 
     cv_current_timer = pygame.surfarray.array3d(current_timer)
     cv_current_timer = np.flipud(np.rot90(cv_current_timer))
