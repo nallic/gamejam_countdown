@@ -2,12 +2,14 @@ import cv2
 import numpy as np
 from datetime import datetime, time
 import sys, pygame
+import configparser
 #import matplotlib.pyplot as plt
 
 ''' configuration '''
 
-deadline = datetime(day=18, month=10, year=2017, hour=22, minute=00)
-print ('deadline is : ' + str(deadline))
+config_filename = 'config.ini'
+
+deadline = datetime.now()
 
 size = width, height = 640, 480
 
@@ -15,6 +17,8 @@ size = width, height = 640, 480
 
 black = (0, 0, 0)
 white = (255,255,255)
+
+color_fg = [255, 255, 255]
 
 ''' program '''
 pygame.init()
@@ -32,12 +36,64 @@ cursor_on = False
 first_run = True
 
 def save_settings():
+    config = configparser.ConfigParser()
+
+    config['DEADLINE'] = {
+        'day' : deadline.day,
+        'month': deadline.month,
+        'year': deadline.year,
+        'hour': deadline.hour,
+        'minute': deadline.minute,
+    }
+
+    config['COLOR_FORGROUND'] = {
+        'red' : color_fg[0],
+        'green' : color_fg[1],
+        'blue' : color_fg[2]
+    }
+
+    config['CURSORS'] = {
+        'c0x': cursor[0][0],
+        'c0y': cursor[0][1],
+        'c1x': cursor[1][0],
+        'c1y': cursor[1][1],
+        'c2x': cursor[2][0],
+        'c2y': cursor[2][1],
+        'c3x': cursor[3][0],
+        'c3y': cursor[3][1],
+    }
+
     print("saving")
-    pass # todo Implement
+    with open(config_filename, 'w') as configfile:
+        config.write(configfile)
+
 
 def load_settings():
+    config = configparser.ConfigParser()
+
     print("loading")
-    pass # todo Implement
+
+    config.read(config_filename)
+
+    day = int(config['DEADLINE']['day'])
+    month = int(config['DEADLINE']['month'])
+    year = int(config['DEADLINE']['year'])
+    hour = int(config['DEADLINE']['hour'])
+    minute = int(config['DEADLINE']['minute'])
+    deadline = datetime(day=day, month=month, year=year, hour=hour, minute=minute)
+
+    color_fg[0] = int(config['COLOR_FORGROUND']['red'])
+    color_fg[1] = int(config['COLOR_FORGROUND']['green'])
+    color_fg[2] = int(config['COLOR_FORGROUND']['blue'])
+
+    cursor[0][0] = int(config['CURSORS']['c0x'])
+    cursor[0][1] = int(config['CURSORS']['c0y'])
+    cursor[1][0] = int(config['CURSORS']['c1x'])
+    cursor[1][1] = int(config['CURSORS']['c1y'])
+    cursor[2][0] = int(config['CURSORS']['c2x'])
+    cursor[2][1] = int(config['CURSORS']['c2y'])
+    cursor[3][0] = int(config['CURSORS']['c3x'])
+    cursor[3][1] = int(config['CURSORS']['c3y'])
 
 ''' Find the smallest size of a box containing the 4 corners 
     (topleft, topright, botleft, botright) (flipping not supported)
@@ -85,7 +141,7 @@ while 1:
     current_timer_s = current_timer_s - (current_timer_minutes * 60)
 
     current_timer_string = '%02d:%02d:%02d' % (current_timer_hours, current_timer_minutes, current_timer_s)
-    current_timer = font.render(current_timer_string, True, white, black)
+    current_timer = font.render(current_timer_string, True, color_fg, black)
 
     cv_current_timer = pygame.surfarray.array3d(current_timer)
     cv_current_timer = np.flipud(np.rot90(cv_current_timer))
