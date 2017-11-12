@@ -12,6 +12,7 @@ config_filename = 'config.ini'
 deadline = datetime.now()
 
 size = width, height = 640, 480
+vert_flip = False
 
 ''' constants '''
 
@@ -24,7 +25,7 @@ color_fg = [255, 255, 255]
 pygame.init()
 
 clock = pygame.time.Clock()
-pygame.key.set_repeat(500, 50)
+pygame.key.set_repeat(500, 5)
 
 #List available modes
 for mode in pygame.display.list_modes(0, pygame.FULLSCREEN):
@@ -64,6 +65,7 @@ def save_settings():
     config.set('CURSORS', 'c2y', cursor[2][1])
     config.set('CURSORS', 'c3x', cursor[3][0])
     config.set('CURSORS', 'c3y', cursor[3][1])
+    config.set('CURSORS', 'flip_vert', vert_flip)
 
     print("saving")
     with open(config_filename, 'w') as configfile:
@@ -72,6 +74,7 @@ def save_settings():
 
 def load_settings():
     global deadline
+    global vert_flip
 
     config = ConfigParser.ConfigParser()
 
@@ -98,6 +101,8 @@ def load_settings():
     cursor[2][1] = int(config.get('CURSORS', 'c2y'))
     cursor[3][0] = int(config.get('CURSORS', 'c3x'))
     cursor[3][1] = int(config.get('CURSORS', 'c3y'))
+    vert_flip_val = config.get('CURSORS', 'flip_vert')
+    vert_flip = vert_flip_val in "True"
 
 ''' Find the smallest size of a box containing the 4 corners 
     (topleft, topright, botleft, botright) (flipping not supported)
@@ -134,6 +139,8 @@ while 1:
                 save_settings()
             if event.key == pygame.K_l:
                 load_settings()
+            if event.key == pygame.K_i:
+                vert_flip = not vert_flip
 
     current_timer_s = (deadline - datetime.now()).seconds
     if(deadline > datetime.now()):
@@ -155,6 +162,8 @@ while 1:
         current_timer_string = '00:00:00'
 
     current_timer = font.render(current_timer_string, True, color_fg, black)
+    if(vert_flip):
+        current_timer = pygame.transform.flip(current_timer, 1, 0)
 
     cv_current_timer = pygame.surfarray.array3d(current_timer)
     cv_current_timer = np.flipud(np.rot90(cv_current_timer))
@@ -173,6 +182,7 @@ while 1:
     cv_current_timer = cv2.warpPerspective(cv_current_timer, M, find_corner_rectsize(cursor))
 
     cv_current_timer = np.rot90(np.flipud(cv_current_timer),-1)
+
     current_timer = pygame.surfarray.make_surface(cv_current_timer)
 
     screen.fill(black)
